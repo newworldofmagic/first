@@ -3,512 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZPG Chronicles: Сказка нового поколения</title>
+    <title>Панель Администратора — ZPG Seasonal Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Marcellus&display=swap');
-        body {
-            font-family: 'Marcellus', serif;
-            background-color: #0d0f12;
-            color: #d1d5db;
-        }
-        h1, h2, h3, .heading-font {
-            font-family: 'Cinzel', serif;
-        }
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #374151;
-            border-radius: 3px;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=scale');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f17; color: #e2e8f0; }
+        .heading-font { font-family: 'Cinzel', serif; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
-<body class="h-screen flex flex-col justify-between overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <!-- Header -->
-    <header class="bg-amber-950/40 border-b border-amber-900/40 p-3 px-6 flex justify-between items-center shadow-lg">
+    <!-- Top Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center shadow-md">
         <div class="flex items-center gap-3">
-            <i class="fa-solid fa-scroll text-amber-500 text-2xl"></i>
-            <h1 class="text-xl font-bold text-amber-200 tracking-wider">ПАНДОРА: ХРОНИКИ ГЕРОЯ</h1>
+            <div class="bg-indigo-600/20 border border-indigo-500/30 p-2 rounded-lg text-indigo-400">
+                <i class="fa-solid fa-server text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-100 tracking-wide heading-font">ZPG WORLD CREATOR</h1>
+                <p class="text-xs text-slate-400">Управление сезонами и генерацией миров</p>
+            </div>
         </div>
-        <div class="flex items-center gap-4 text-sm">
-            <div id="game-time" class="text-amber-400 font-mono"><i class="fa-regular fa-clock mr-1"></i> День 1, 08:00</div>
-            <button id="btn-regen" onclick="initNewGame()" class="bg-amber-800/60 hover:bg-amber-700 text-amber-100 px-3 py-1.5 rounded border border-amber-600/50 text-xs transition">
-                <i class="fa-solid fa-dice mr-1"></i> Новый Герой
+        <div class="flex gap-2 text-xs">
+            <button onclick="switchAdminTab('worlds')" id="nav-btn-worlds" class="bg-indigo-600 text-white px-3 py-2 rounded font-medium shadow">
+                <i class="fa-solid fa-globe mr-1.5"></i> Активные Миры
+            </button>
+            <button onclick="switchAdminTab('create')" id="nav-btn-create" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded font-medium border border-slate-700 transition">
+                <i class="fa-solid fa-plus mr-1.5"></i> Создать Новый Мир
             </button>
         </div>
     </header>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 grid grid-cols-12 gap-3 p-3 overflow-hidden">
+    <!-- Main Admin Workspace -->
+    <main class="flex-1 p-4 overflow-hidden grid grid-cols-12 gap-4">
 
-        <!-- LEFT PANEL: Hero Stats & Needs (3 Cols) -->
-        <section class="col-span-3 flex flex-col gap-3 h-full overflow-y-auto custom-scroll pr-1">
-            
-            <!-- Hero Profile Card -->
-            <div class="bg-gray-900/80 border border-amber-900/30 rounded-lg p-4 shadow">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <h2 id="hero-name" class="text-lg font-bold text-amber-300">Загрузка...</h2>
-                        <div id="hero-sub" class="text-xs text-gray-400">Человек • Воин</div>
-                    </div>
-                    <span id="hero-lvl" class="bg-amber-900/50 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded text-xs font-bold">Ур. 1</span>
-                </div>
-                <div id="hero-prof" class="text-xs text-emerald-400 mb-3"><i class="fa-solid fa-briefcase mr-1"></i> Профессия: Травник</div>
-
-                <!-- Needs Bars -->
-                <div class="space-y-2 text-xs mb-3">
-                    <div>
-                        <div class="flex justify-between mb-1"><span>Здоровье</span><span id="val-hp">100/100</span></div>
-                        <div class="w-full bg-gray-800 rounded-full h-2"><div id="bar-hp" class="bg-red-600 h-2 rounded-full" style="width: 100%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1"><span>Сытость</span><span id="val-food">100%</span></div>
-                        <div class="w-full bg-gray-800 rounded-full h-2"><div id="bar-food" class="bg-amber-600 h-2 rounded-full" style="width: 100%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1"><span>Энергия (Сон)</span><span id="val-energy">100%</span></div>
-                        <div class="w-full bg-gray-800 rounded-full h-2"><div id="bar-energy" class="bg-blue-600 h-2 rounded-full" style="width: 100%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1"><span>Мораль</span><span id="val-morale">100%</span></div>
-                        <div class="w-full bg-gray-800 rounded-full h-2"><div id="bar-morale" class="bg-purple-600 h-2 rounded-full" style="width: 100%"></div></div>
-                    </div>
-                </div>
-
-                <!-- Personality Traits -->
-                <div class="border-t border-gray-800 pt-2 mt-2">
-                    <div class="text-xs text-gray-400 mb-1 font-bold">Характер и Черты:</div>
-                    <div id="hero-traits" class="flex flex-wrap gap-1"></div>
-                </div>
+        <!-- TAB 1: LIST OF ACTIVE WORLDS -->
+        <section id="tab-worlds" class="col-span-12 flex flex-col h-full bg-slate-900/60 border border-slate-800 rounded-xl p-4 shadow">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h2 class="text-md font-bold text-slate-200 heading-font">Запущенные Сезоны (Миры)</h2>
+                <span class="text-xs text-indigo-400 font-mono bg-indigo-950/60 border border-indigo-800/50 px-2.5 py-1 rounded">Всего миров: <b id="worlds-count">1</b></span>
             </div>
 
-            <!-- Thoughts / Indirect Control -->
-            <div class="bg-gray-900/80 border border-amber-900/30 rounded-lg p-3 shadow flex-1 flex flex-col">
-                <h3 class="text-sm font-bold text-amber-200 mb-2 flex items-center">
-                    <i class="fa-solid fa-brain text-amber-500 mr-2"></i> Меню Мыслей (Внушение)
-                </h3>
-                <p class="text-xs text-gray-400 mb-3">Отправьте мысль герою. Он исполнит её, если позволит характер и потребности.</p>
-                
-                <div class="space-y-2 flex-1">
-                    <button onclick="suggestThought('farm')" class="w-full text-left bg-gray-800/80 hover:bg-amber-950/50 border border-gray-700/60 p-2 rounded text-xs flex justify-between items-center group transition">
-                        <span><i class="fa-solid fa-crosshairs mr-1.5 text-red-400"></i> «Не плохо бы наведаться на фарм»</span>
-                        <i class="fa-solid fa-arrow-right opacity-0 group-hover:opacity-100 text-amber-400"></i>
-                    </button>
-                    <button onclick="suggestThought('rest')" class="w-full text-left bg-gray-800/80 hover:bg-amber-950/50 border border-gray-700/60 p-2 rounded text-xs flex justify-between items-center group transition">
-                        <span><i class="fa-solid fa-bed mr-1.5 text-blue-400"></i> «Тебе нужно отдохнуть в таверне»</span>
-                        <i class="fa-solid fa-arrow-right opacity-0 group-hover:opacity-100 text-amber-400"></i>
-                    </button>
-                    <button onclick="suggestThought('read')" class="w-full text-left bg-gray-800/80 hover:bg-amber-950/50 border border-gray-700/60 p-2 rounded text-xs flex justify-between items-center group transition">
-                        <span><i class="fa-solid fa-book-open mr-1.5 text-purple-400"></i> «Почитай книги из рюкзака»</span>
-                        <i class="fa-solid fa-arrow-right opacity-0 group-hover:opacity-100 text-amber-400"></i>
-                    </button>
-                </div>
-
-                <div id="thought-status" class="mt-2 p-2 bg-gray-950 rounded border border-gray-800 text-[11px] italic text-amber-300 min-h-[36px]">
-                    Герой спокойно бредёт по роще...
-                </div>
-            </div>
-
-        </section>
-
-        <!-- CENTER PANEL: Journal / Diary Log (5 Cols) -->
-        <section class="col-span-5 bg-gray-900/90 border border-amber-900/30 rounded-lg p-4 flex flex-col h-full shadow">
-            <div class="flex justify-between items-center pb-2 mb-3 border-b border-amber-900/40">
-                <h3 class="text-md font-bold text-amber-200 flex items-center">
-                    <i class="fa-solid fa-book-bookmark text-amber-500 mr-2"></i> Дневник Героя
-                </h3>
-                <span class="text-xs text-gray-500">Автономные действия</span>
-            </div>
-
-            <!-- Log Scroll Container -->
-            <div id="journal-log" class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-2 text-sm leading-relaxed">
-                <!-- Dynamic Logs Insertion -->
+            <!-- Worlds Table Grid -->
+            <div id="worlds-list" class="grid grid-cols-3 gap-4 overflow-y-auto custom-scroll pr-1">
+                <!-- World Cards populated via JS -->
             </div>
         </section>
 
-        <!-- RIGHT PANEL: Inventory & World Map Tabs (4 Cols) -->
-        <section class="col-span-4 flex flex-col gap-3 h-full overflow-hidden">
+        <!-- TAB 2: CREATE / EDIT WORLD FORM (Hidden by default) -->
+        <section id="tab-create" class="hidden col-span-12 grid grid-cols-12 gap-4 h-full overflow-y-auto custom-scroll pr-1">
             
-            <!-- Navigation Tabs -->
-            <div class="flex bg-gray-900 rounded-lg p-1 border border-amber-900/30">
-                <button id="tab-btn-inv" onclick="switchTab('inv')" class="flex-1 py-1.5 text-xs font-bold rounded bg-amber-900/60 text-amber-200">
-                    <i class="fa-solid fa-bag-shopping mr-1"></i> Инвентарь
-                </button>
-                <button id="tab-btn-map" onclick="switchTab('map')" class="flex-1 py-1.5 text-xs font-bold rounded text-gray-400 hover:text-amber-200">
-                    <i class="fa-solid fa-map-location-dot mr-1"></i> Карта Зон
-                </button>
-            </div>
-
-            <!-- TAB 1: Inventory & Equipment -->
-            <div id="tab-inv" class="bg-gray-900/80 border border-amber-900/30 rounded-lg p-3 flex-1 flex flex-col overflow-hidden">
+            <!-- Left Config Column (6 Cols) -->
+            <div class="col-span-6 space-y-4">
                 
-                <!-- Weight Bar & Gold -->
-                <div class="flex justify-between items-center mb-3 bg-gray-950 p-2 rounded border border-gray-800 text-xs">
-                    <div><i class="fa-solid fa-coins text-yellow-500 mr-1"></i> Золото: <span id="val-gold" class="text-amber-300 font-bold">15</span></div>
-                    <div><i class="fa-solid fa-weight-hanging text-gray-400 mr-1"></i> Вес: <span id="val-weight">2.1 / 15.0 кг</span></div>
-                </div>
+                <!-- General Info -->
+                <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-3">
+                    <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-sliders mr-2"></i> Параметры Сезона
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Название Мира / Сезона</label>
+                        <input type="text" id="world-name" value="Пандория: Сезон I" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
 
-                <!-- Equipment Slots -->
-                <div class="mb-3 border-b border-gray-800 pb-2">
-                    <div class="text-xs text-gray-400 mb-1 font-bold">Экипировано (Управляет игрок):</div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-gray-950 p-2 rounded border border-gray-800">
-                            <span class="text-gray-500 block text-[10px]">Оружие:</span>
-                            <span id="eq-weapon" class="text-amber-200">Старый кинжал (+2 АТК)</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Сеттинг / Жанр</label>
+                            <select id="world-setting" onchange="applySettingPreset()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="fantasy">Фэнтези (Классика)</option>
+                                <option value="dark-fantasy">Тёмное Фэнтези</option>
+                                <option value="scifi">Космоопера / Sci-Fi</option>
+                                <option value="medieval">Средневековье (Без магии)</option>
+                                <option value="cyberpunk">Киберпанк</option>
+                            </select>
                         </div>
-                        <div class="bg-gray-950 p-2 rounded border border-gray-800">
-                            <span class="text-gray-500 block text-[10px]">Броня:</span>
-                            <span id="eq-armor" class="text-amber-200">Поношенная рубаха (+1 ЗАЩ)</span>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Длительность (Дней)</label>
+                            <input type="number" id="world-days" value="14" min="1" max="90" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Промпт ИИ-Рассказчика (Стиль дневника)</label>
+                        <textarea id="world-prompt" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-mono"></textarea>
+                    </div>
+                </div>
+
+                <!-- Classes Constructor -->
+                <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-users-gear mr-2"></i> Доступные Классы
+                        </h3>
+                        <button onclick="addClassRow()" class="bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 text-[11px] px-2 py-1 rounded">
+                            <i class="fa-solid fa-plus mr-1"></i> Добавить Класс
+                        </button>
+                    </div>
+
+                    <div id="classes-list" class="space-y-2 max-h-48 overflow-y-auto custom-scroll pr-1">
+                        <!-- Classes inputs generated dynamically -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Config Column: Map Generator (6 Cols) -->
+            <div class="col-span-6 space-y-4 flex flex-col">
+                <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-3 flex-1 flex flex-col">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-map mr-2"></i> Конструктор Карт и Сеток (3x3)
+                        </h3>
+                        <button onclick="autoGenerateMap()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] px-2.5 py-1 rounded border border-slate-700">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1 text-amber-400"></i> Сгенерировать ИИ
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Кликните на сектор карты, чтобы настроить его статус (Город / Дикая зона / Босс).</p>
+
+                    <!-- 3x3 Map Preview -->
+                    <div id="admin-map-grid" class="grid grid-cols-3 gap-2 flex-1 my-2">
+                        <!-- Interactive Grid Cells -->
+                    </div>
+
+                    <!-- Selected Zone Quick Edit -->
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-slate-500 block text-[10px] uppercase font-bold">Сектор:</span>
+                            <span id="selected-cell-title" class="font-bold text-slate-200">Сектор [0, 0]</span>
+                        </div>
+                        <div>
+                            <label class="text-slate-500 block text-[10px] uppercase font-bold">Тип Зоны:</label>
+                            <select id="zone-type-select" onchange="updateSelectedZoneType()" class="bg-slate-900 border border-slate-700 text-xs rounded px-1.5 py-0.5 text-slate-200 w-full">
+                                <option value="town">Город / Безопасно</option>
+                                <option value="wild">Дикая Земля (Фарм)</option>
+                                <option value="boss">Логово Босса</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Loot & Bag Items -->
-                <div class="text-xs text-gray-400 mb-1 font-bold flex justify-between">
-                    <span>Рюкзак и Трофеи:</span>
-                    <span class="text-[10px] text-gray-500">Галочка = Авто-продажа</span>
-                </div>
-                <div id="bag-list" class="flex-1 overflow-y-auto custom-scroll space-y-1.5 pr-1">
-                    <!-- Items generated dynamically -->
-                </div>
-            </div>
-
-            <!-- TAB 2: World Map & Manual Cartography -->
-            <div id="tab-map" class="hidden bg-gray-900/80 border border-amber-900/30 rounded-lg p-3 flex-1 flex flex-col overflow-hidden">
-                <p class="text-xs text-gray-400 mb-2">Уровни зон и монстры скрыты. Нажмите на сектор, чтобы сделать ручную заметку!</p>
-
-                <!-- Grid Map (3x3 Zones) -->
-                <div id="map-grid" class="grid grid-cols-3 gap-2 flex-1">
-                    <!-- Grid cells generated dynamically -->
-                </div>
-
-                <!-- Selected Zone Note Editor -->
-                <div class="mt-3 bg-gray-950 p-2 rounded border border-gray-800">
-                    <div class="text-xs font-bold text-amber-300 mb-1" id="selected-zone-title">Заметка к сектору</div>
-                    <input type="text" id="zone-note-input" placeholder="Напишите сюда свои наблюдения..." class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
-                    <button onclick="saveZoneNote()" class="mt-1 w-full bg-amber-900/50 hover:bg-amber-800 text-amber-200 text-xs py-1 rounded border border-amber-700/40">Сохранить заметку</button>
-                </div>
+                <!-- Launch Button -->
+                <button onclick="launchNewWorld()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rocket text-lg"></i> ЗАПУСТИТЬ НОВЫЙ МИР (СЕЗОН)
+                </button>
             </div>
 
         </section>
 
     </main>
 
-    <!-- JS Logic Game Engine -->
+    <!-- JS Logic for Admin Dashboard -->
     <script>
-        // --- DATA STRUCTURES & STATE ---
-        const RACES = ["Человек", "Эльф", "Дворф", "Орк", "Полурослик"];
-        const CLASSES = ["Воин", "Маг", "Следопыт", "Жрец", "Плут"];
-        const PROFESSIONS = ["Травник (Мирный)", "Охотник", "Шахтёр (Мирный)", "Кузнец", "Авантюрист"];
-        const TOWNS = ["Деревня «Дубки»", "Посёлок «Речной»", "Хутор «Тихий»", "Город «Осборн»"];
-
-        let hero = {
-            name: "Артур",
-            race: "",
-            class: "",
-            prof: "",
-            startLocation: "",
-            lvl: 1,
-            hp: 100, maxHp: 100,
-            food: 100,
-            energy: 100,
-            morale: 100,
-            gold: 25,
-            courage: 50, // >50 brave, <50 coward
-            greed: 50,
-            maxWeight: 15.0,
-            currentWeight: 2.1,
-            equipment: { weapon: { name: "Ржавый меч", atk: 3, weight: 2.0 }, armor: { name: "Тканевая туника", def: 1, weight: 0.5 } },
-            inventory: [
-                { id: 1, name: "Хлебный мякиш", weight: 0.2, autoSell: false, type: "food" },
-                { id: 2, name: "Книга: Огненный всплеск", weight: 1.0, autoSell: false, type: "book" },
-                { id: 3, name: "Клык волка", weight: 0.3, autoSell: true, type: "loot", price: 4 }
-            ],
-            targetZone: 0,
-            currentZone: 0
-        };
-
-        let zones = [
-            { id: 0, name: "Стартовая Деревня", danger: "Безопасно", level: "1", note: "Здесь можно отдохнуть.", isTown: true },
-            { id: 1, name: "Шепчущий Лес", danger: "???", level: "???", note: "", isTown: false },
-            { id: 2, name: "Заброшенные Шахты", danger: "???", level: "???", note: "", isTown: false },
-            { id: 3, name: "Туманный Залив", danger: "???", level: "???", note: "", isTown: false },
-            { id: 4, name: "Темная Долина", danger: "???", level: "???", note: "", isTown: false },
-            { id: 5, name: "Старый Холм", danger: "???", level: "???", note: "", isTown: false },
-            { id: 6, name: "Торговый Город", danger: "Безопасно", level: "1", note: "Главный рынок.", isTown: true },
-            { id: 7, name: "Гнилое Болото", danger: "???", level: "???", note: "", isTown: false },
-            { id: 8, name: "Пик Дракона", danger: "???", level: "???", note: "", isTown: false }
+        // Storage of Active Worlds
+        let activeWorlds = [
+            {
+                id: "w-1",
+                name: "Пандория: Альфа Сезон",
+                setting: "Фэнтези (Классика)",
+                daysLeft: 12,
+                totalDays: 14,
+                playersCount: 18,
+                status: "active",
+                classes: ["Воин", "Маг", "Следопыт", "Плут"]
+            }
         ];
 
-        let selectedZoneId = 0;
-        let gameDay = 1;
-        let gameHour = 8;
+        let currentMapGrid = Array(9).fill(null).map((_, i) => ({
+            id: i,
+            name: i === 0 ? "Стартовый Город" : `Неизведанная Зона ${i}`,
+            type: i === 0 ? "town" : "wild"
+        }));
 
-        // --- INIT & CHARACTER GENERATOR ---
-        function initNewGame() {
-            const firstNames = ["Эдвард", "Лирия", "Гаррет", "Бронн", "Эллен", "Торрин", "Сильвия"];
-            hero.name = firstNames[Math.floor(Math.random() * firstNames.length)];
-            hero.race = RACES[Math.floor(Math.random() * RACES.length)];
-            hero.class = CLASSES[Math.floor(Math.random() * CLASSES.length)];
-            hero.prof = PROFESSIONS[Math.floor(Math.random() * PROFESSIONS.length)];
-            hero.startLocation = TOWNS[Math.floor(Math.random() * TOWNS.length)];
+        let activeSelectedCell = 0;
+
+        let settingPrompts = {
+            "fantasy": "Ты — герой фэнтези-мира. Пиши дневник атмосферно, описывай монстров, таверны и старую магию.",
+            "dark-fantasy": "Ты выживаешь в мрачном мире сурового фэнтези. Описывай грязь, кровь, страх и тяжелые победы.",
+            "scifi": "Ты — наемник в далеком космосе. Используй футуристический сленг, упоминай скафандры, плазму и астероиды.",
+            "medieval": "Реалистичное средневековье без волшебства. Описывай усталость, рыцарей, болезни и звон стали.",
+            "cyberpunk": "Мрачный неоновый город. Пиши про импланты, кредиты, банды и хакерство."
+        };
+
+        // --- NAVIGATION TABS ---
+        function switchAdminTab(tab) {
+            document.getElementById('tab-worlds').classList.toggle('hidden', tab !== 'worlds');
+            document.getElementById('tab-create').classList.toggle('hidden', tab !== 'create');
             
-            hero.courage = Math.floor(Math.random() * 100);
-            hero.greed = Math.floor(Math.random() * 100);
-            hero.hp = 100; hero.food = 100; hero.energy = 100; hero.morale = 100;
-            hero.gold = 15 + Math.floor(Math.random() * 20);
-
-            document.getElementById('journal-log').innerHTML = '';
-            addLog(`⚡ Родился новый герой: <b>${hero.name}</b> (${hero.race} ${hero.class}). Наклонность: ${hero.prof}. Предыстория начинается в ${hero.startLocation}.`);
-            
-            recalcWeight();
-            renderUI();
-            renderMap();
+            document.getElementById('nav-btn-worlds').className = tab === 'worlds' ? "bg-indigo-600 text-white px-3 py-2 rounded font-medium shadow" : "bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded font-medium border border-slate-700 transition";
+            document.getElementById('nav-btn-create').className = tab === 'create' ? "bg-indigo-600 text-white px-3 py-2 rounded font-medium shadow" : "bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded font-medium border border-slate-700 transition";
         }
 
-        // --- GAME LOOP (Auto-Tick every 4s) ---
-        setInterval(() => {
-            gameHour++;
-            if (gameHour >= 24) { gameHour = 0; gameDay++; }
-            document.getElementById('game-time').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> День ${gameDay}, ${gameHour < 10 ? '0' + gameHour : gameHour}:00`;
+        // --- RENDER ACTIVE WORLDS ---
+        function renderWorldsList() {
+            const container = document.getElementById('worlds-list');
+            container.innerHTML = '';
+            document.getElementById('worlds-count').innerText = activeWorlds.length;
 
-            // Decay stats
-            hero.food = Math.max(0, hero.food - 3);
-            hero.energy = Math.max(0, hero.energy - 2);
-
-            // Autonomous decision making
-            heroTickLogic();
-            
-            renderUI();
-        }, 4000);
-
-        function heroTickLogic() {
-            // High priority: Needs
-            if (hero.food < 20 || hero.energy < 20) {
-                addLog(`😴 <b>${hero.name}</b> почувствовал сильный голод и усталость. Он решил вернуться в город, чтобы поесть и отдохнуть.`);
-                hero.food = Math.min(100, hero.food + 40);
-                hero.energy = Math.min(100, hero.energy + 50);
-                hero.hp = Math.min(100, hero.hp + 20);
-                hero.gold = Math.max(0, hero.gold - 5);
-                autoSellLoot();
-                return;
-            }
-
-            // Pacifist / Peaceful Job Preference
-            if (hero.prof.includes("Мирный") && Math.random() > 0.4) {
-                const crafts = ["собирал редкие травы у дороги", "помогал местному кузнецу", "наловил рыбы в реке"];
-                const action = crafts[Math.floor(Math.random() * crafts.length)];
-                const earned = Math.floor(Math.random() * 5) + 2;
-                hero.gold += earned;
-                addLog(`🌿 <b>${hero.name}</b> избегает кровавых боев. Он ${action} и заработал +${earned} золота.`);
-                return;
-            }
-
-            // Combat / Exploration Tick
-            const currentZoneObj = zones[hero.currentZone];
-            if (currentZoneObj.isTown) {
-                addLog(`🏘️ <b>${hero.name}</b> прогуливается по улицам локации «${currentZoneObj.name}», заглядывая в лавки.`);
-                // 30% chance to venture out
-                if (Math.random() > 0.6) hero.currentZone = 1; // Move to forest
-            } else {
-                // Battle encounter
-                const monsters = ["Дикий Волк", "Лесной Гоблин", "Болотная Поганка", "Разбойник"];
-                const monster = monsters[Math.floor(Math.random() * monsters.length)];
-                const dmg = Math.floor(Math.random() * 15) + 5;
-                hero.hp = Math.max(0, hero.hp - dmg);
-                
-                const lootNames = ["Клык монстра", "Старый кошелек", "Подозрительный гриб", "Шкура"];
-                const lootItem = {
-                    id: Date.now(),
-                    name: lootNames[Math.floor(Math.random() * lootNames.length)],
-                    weight: parseFloat((Math.random() * 1.5 + 0.2).toFixed(1)),
-                    autoSell: true,
-                    price: Math.floor(Math.random() * 8) + 2
-                };
-
-                if (hero.currentWeight + lootItem.weight <= hero.maxWeight) {
-                    hero.inventory.push(lootItem);
-                    recalcWeight();
-                    addLog(`⚔️ <b>${hero.name}</b> сразился с <b>${monster}</b>! Получил ${dmg} урона. Добыча: <i>${lootItem.name}</i> (${lootItem.weight}кг).`);
-                } else {
-                    addLog(`⚔️ <b>${hero.name}</b> победил <b>${monster}</b>, но рюкзак перегружен! Пришлось оставить трофей.`);
-                }
-            }
-        }
-
-        // --- INDIRECT CONTROL (THOUGHTS) ---
-        function suggestThought(type) {
-            const statusEl = document.getElementById('thought-status');
-            if (type === 'farm') {
-                if (hero.energy < 30) {
-                    statusEl.innerText = `Герой подумал: «Фарм? Нет уж, я слишком устал, иду спать!»`;
-                } else {
-                    statusEl.innerText = `Герой воодушевился вашей мыслью и направляется в дикие земли!`;
-                    hero.currentZone = 1;
-                    addLog(`💡 <b>${hero.name}</b> подчинился вашей мысли и отправился на приключения.`);
-                }
-            } else if (type === 'rest') {
-                statusEl.innerText = `Герой согласен: «Идея отличная, нужно выпить эля и поспать».`;
-                hero.currentZone = 0;
-                hero.energy = 100;
-                addLog(`💤 <b>${hero.name}</b> послушался совета и отправился в таверну.`);
-            } else if (type === 'read') {
-                const bookIndex = hero.inventory.findIndex(i => i.type === 'book');
-                if (bookIndex !== -1) {
-                    const book = hero.inventory[bookIndex];
-                    statusEl.innerText = `Герой достал «${book.name}» и начал усердно читать...`;
-                    addLog(`📖 <b>${hero.name}</b> прочитал книгу «${book.name}» и выучил новое заклинание!`);
-                    hero.inventory.splice(bookIndex, 1);
-                    recalcWeight();
-                } else {
-                    statusEl.innerText = `Герой порылся в сумке: «Но у меня же нет книг!»`;
-                }
-            }
-            renderUI();
-        }
-
-        // --- INVENTORY & WEIGHT MECHANICS ---
-        function recalcWeight() {
-            let total = hero.equipment.weapon.weight + hero.equipment.armor.weight;
-            hero.inventory.forEach(item => total += item.weight);
-            hero.currentWeight = parseFloat(total.toFixed(1));
-        }
-
-        function toggleAutoSell(itemId) {
-            const item = hero.inventory.find(i => i.id === itemId);
-            if (item) item.autoSell = !item.autoSell;
-            renderUI();
-        }
-
-        function autoSellLoot() {
-            let earned = 0;
-            hero.inventory = hero.inventory.filter(item => {
-                if (item.autoSell && item.price) {
-                    earned += item.price;
-                    return false; // remove
-                }
-                return true;
-            });
-            if (earned > 0) {
-                hero.gold += earned;
-                addLog(`💰 В городе герой автоматически продал разрешенные трофеи на <b>+${earned} золота</b>.`);
-            }
-            recalcWeight();
-        }
-
-        // --- MAP & NOTES ---
-        function renderMap() {
-            const gridEl = document.getElementById('map-grid');
-            gridEl.innerHTML = '';
-            zones.forEach((z, idx) => {
-                const isSelected = idx === selectedZoneId;
-                const cell = document.createElement('div');
-                cell.className = `p-2 rounded border text-xs cursor-pointer flex flex-col justify-between transition ${
-                    isSelected ? 'bg-amber-950/80 border-amber-500' : 'bg-gray-950 border-gray-800 hover:border-gray-600'
-                }`;
-                cell.onclick = () => selectZone(idx);
-                cell.innerHTML = `
-                    <div class="font-bold text-amber-200 flex justify-between">
-                        <span>${z.name}</span>
-                        ${z.isTown ? '<i class="fa-solid fa-house-chimney text-emerald-400"></i>' : ''}
-                    </div>
-                    <div class="text-[10px] text-gray-400 my-1">Опасность: ${z.danger}</div>
-                    <div class="text-[10px] text-amber-400/80 truncate">${z.note ? '📝 ' + z.note : '<i>Нет заметок</i>'}</div>
-                `;
-                gridEl.appendChild(cell);
-            });
-        }
-
-        function selectZone(id) {
-            selectedZoneId = id;
-            document.getElementById('selected-zone-title').innerText = `Заметка к: ${zones[id].name}`;
-            document.getElementById('zone-note-input').value = zones[id].note || '';
-            renderMap();
-        }
-
-        function saveZoneNote() {
-            const text = document.getElementById('zone-note-input').value;
-            zones[selectedZoneId].note = text;
-            renderMap();
-        }
-
-        // --- UI RENDER & UTILS ---
-        function renderUI() {
-            document.getElementById('hero-name').innerText = hero.name;
-            document.getElementById('hero-sub').innerText = `${hero.race} • ${hero.class}`;
-            document.getElementById('hero-prof').innerHTML = `<i class="fa-solid fa-briefcase mr-1"></i> Наклонность: ${hero.prof}`;
-            document.getElementById('hero-lvl').innerText = `Ур. ${hero.lvl}`;
-
-            // Bars
-            document.getElementById('val-hp').innerText = `${hero.hp}/${hero.maxHp}`;
-            document.getElementById('bar-hp').style.width = `${(hero.hp/hero.maxHp)*100}%`;
-            document.getElementById('val-food').innerText = `${hero.food}%`;
-            document.getElementById('bar-food').style.width = `${hero.food}%`;
-            document.getElementById('val-energy').innerText = `${hero.energy}%`;
-            document.getElementById('bar-energy').style.width = `${hero.energy}%`;
-            document.getElementById('val-morale').innerText = `${hero.morale}%`;
-            document.getElementById('bar-morale').style.width = `${hero.morale}%`;
-
-            // Traits
-            const traitsEl = document.getElementById('hero-traits');
-            traitsEl.innerHTML = `
-                <span class="bg-gray-800 text-gray-300 border border-gray-700 px-1.5 py-0.5 rounded text-[10px]">${hero.courage > 50 ? 'Храбрый' : 'Трусоватый'}</span>
-                <span class="bg-gray-800 text-gray-300 border border-gray-700 px-1.5 py-0.5 rounded text-[10px]">${hero.greed > 50 ? 'Жадный' : 'Щедрый'}</span>
-            `;
-
-            // Gold & Weight
-            document.getElementById('val-gold').innerText = hero.gold;
-            document.getElementById('val-weight').innerText = `${hero.currentWeight} / ${hero.maxWeight} кг`;
-            if (hero.currentWeight > hero.maxWeight) {
-                document.getElementById('val-weight').className = "text-red-500 font-bold";
-            } else {
-                document.getElementById('val-weight').className = "text-gray-300";
-            }
-
-            // Inventory List
-            const bagEl = document.getElementById('bag-list');
-            bagEl.innerHTML = '';
-            hero.inventory.forEach(item => {
-                const row = document.createElement('div');
-                row.className = "bg-gray-950 p-2 rounded border border-gray-800 flex justify-between items-center text-xs";
-                row.innerHTML = `
+            activeWorlds.forEach(w => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-3 relative overflow-hidden";
+                card.innerHTML = `
                     <div>
-                        <span class="text-amber-200 block">${item.name}</span>
-                        <span class="text-[10px] text-gray-500">${item.weight} кг ${item.price ? '• ' + item.price + ' зол.' : ''}</span>
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                                ${w.status === 'active' ? '● Активен' : 'Завершен'}
+                            </span>
+                            <span class="text-xs text-slate-400"><i class="fa-solid fa-users mr-1"></i> ${w.playersCount} игроков</span>
+                        </div>
+                        <h3 class="text-md font-bold text-slate-100 heading-font mt-1">${w.name}</h3>
+                        <p class="text-xs text-slate-400 mb-2">Жанр: <span class="text-slate-200">${w.setting}</span></p>
+                        
+                        <div class="text-[11px] text-slate-400 space-y-1 bg-slate-900 p-2 rounded border border-slate-800/80">
+                            <div>Осталось: <b>${w.daysLeft} из ${w.totalDays} дней</b></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1">
+                                <div class="bg-indigo-500 h-1.5 rounded-full" style="width: ${(w.daysLeft/w.totalDays)*100}%"></div>
+                            </div>
+                        </div>
                     </div>
-                    ${item.price ? `
-                    <label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer">
-                        <input type="checkbox" ${item.autoSell ? 'checked' : ''} onchange="toggleAutoSell(${item.id})" class="rounded accent-amber-600">
-                        Продать
-                    </label>` : '<span class="text-[10px] text-purple-400">Книга</span>'}
+
+                    <div class="flex gap-2 pt-2 border-t border-slate-800/80">
+                        <button onclick="alert('Скопирована прямая ссылка для игроков!')" class="flex-1 bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-200 border border-indigo-700/50 py-1.5 rounded text-xs transition">
+                            <i class="fa-solid fa-link mr-1"></i> Ссылка
+                        </button>
+                        <button onclick="closeWorld('${w.id}')" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50 px-2.5 py-1.5 rounded text-xs transition">
+                            <i class="fa-solid fa-power-off"></i>
+                        </button>
+                    </div>
                 `;
-                bagEl.appendChild(row);
+                container.appendChild(card);
             });
         }
 
-        function switchTab(tab) {
-            document.getElementById('tab-inv').classList.toggle('hidden', tab !== 'inv');
-            document.getElementById('tab-map').classList.toggle('hidden', tab !== 'map');
-            document.getElementById('tab-btn-inv').className = tab === 'inv' ? 'flex-1 py-1.5 text-xs font-bold rounded bg-amber-900/60 text-amber-200' : 'flex-1 py-1.5 text-xs font-bold rounded text-gray-400';
-            document.getElementById('tab-btn-map').className = tab === 'map' ? 'flex-1 py-1.5 text-xs font-bold rounded bg-amber-900/60 text-amber-200' : 'flex-1 py-1.5 text-xs font-bold rounded text-gray-400';
+        // --- CLASSES CONSTRUCTOR ---
+        let defaultClasses = ["Воин", "Маг", "Следопыт", "Плут"];
+        
+        function renderClassesInput() {
+            const list = document.getElementById('classes-list');
+            list.innerHTML = '';
+            defaultClasses.forEach((cls, idx) => {
+                const item = document.createElement('div');
+                item.className = "flex gap-2 items-center";
+                item.innerHTML = `
+                    <input type="text" value="${cls}" onchange="defaultClasses[${idx}]=this.value" class="flex-1 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <button onclick="removeClassRow(${idx})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                list.appendChild(item);
+            });
         }
 
-        function addLog(msg) {
-            const logContainer = document.getElementById('journal-log');
-            const entry = document.createElement('div');
-            entry.className = "p-2 bg-gray-950/60 border-l-2 border-amber-700/60 rounded-r text-xs text-gray-300";
-            entry.innerHTML = `<span class="text-[10px] text-gray-500 block mb-0.5">[День ${gameDay}, ${gameHour}:00]</span>${msg}`;
-            logContainer.prepend(entry);
+        function addClassRow() {
+            defaultClasses.push("Новый Класс");
+            renderClassesInput();
         }
 
-        // Start initialization
-        initNewGame();
+        function removeClassRow(idx) {
+            defaultClasses.splice(idx, 1);
+            renderClassesInput();
+        }
+
+        // --- MAP CONSTRUCTOR ---
+        function renderAdminMap() {
+            const grid = document.getElementById('admin-map-grid');
+            grid.innerHTML = '';
+            currentMapGrid.forEach((cell, idx) => {
+                const el = document.createElement('div');
+                const isSelected = idx === activeSelectedCell;
+                let bgClass = "bg-slate-950 border-slate-800";
+                let icon = "fa-compass";
+                
+                if (cell.type === 'town') { bgClass = "bg-emerald-950/40 border-emerald-700/60"; icon = "fa-house-chimney text-emerald-400"; }
+                if (cell.type === 'wild') { bgClass = "bg-slate-950 border-slate-800"; icon = "fa-tree text-slate-500"; }
+                if (cell.type === 'boss') { bgClass = "bg-rose-950/40 border-rose-700/60"; icon = "fa-skull text-rose-400"; }
+
+                el.className = `p-2 rounded-lg border text-xs cursor-pointer flex flex-col justify-between transition ${bgClass} ${isSelected ? 'ring-2 ring-indigo-500' : 'hover:border-slate-600'}`;
+                el.onclick = () => selectMapCell(idx);
+                el.innerHTML = `
+                    <div class="flex justify-between items-center font-bold text-slate-300">
+                        <span class="truncate">${cell.name}</span>
+                        <i class="fa-solid ${icon}"></i>
+                    </div>
+                    <span class="text-[10px] text-slate-500 uppercase mt-2">${cell.type}</span>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        function selectMapCell(idx) {
+            activeSelectedCell = idx;
+            const cell = currentMapGrid[idx];
+            document.getElementById('selected-cell-title').innerText = `${cell.name} [Сектор ${idx + 1}]`;
+            document.getElementById('zone-type-select').value = cell.type;
+            renderAdminMap();
+        }
+
+        function updateSelectedZoneType() {
+            const val = document.getElementById('zone-type-select').value;
+            currentMapGrid[activeSelectedCell].type = val;
+            renderAdminMap();
+        }
+
+        function applySettingPreset() {
+            const setting = document.getElementById('world-setting').value;
+            document.getElementById('world-prompt').value = settingPrompts[setting] || "";
+        }
+
+        function autoGenerateMap() {
+            const prefixes = ["Темный", "Забытый", "Кровавый", "Туманный", "Солнечный", "Мертвый"];
+            const places = ["Дол", "Пик", "Лес", "Каньон", "Аванпост", "Овраг"];
+            
+            currentMapGrid.forEach((cell, idx) => {
+                if (idx === 0) {
+                    cell.name = "Центральная Цитадель";
+                    cell.type = "town";
+                } else if (idx === 8) {
+                    cell.name = "Логово Владыки";
+                    cell.type = "boss";
+                } else {
+                    const p = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const pl = places[Math.floor(Math.random() * places.length)];
+                    cell.name = `${p} ${pl}`;
+                    cell.type = "wild";
+                }
+            });
+            renderAdminMap();
+        }
+
+        // --- LAUNCH NEW WORLD ---
+        function launchNewWorld() {
+            const name = document.getElementById('world-name').value;
+            const settingSelect = document.getElementById('world-setting');
+            const settingText = settingSelect.options[settingSelect.selectedIndex].text;
+            const days = parseInt(document.getElementById('world-days').value);
+
+            const newWorld = {
+                id: "w-" + (activeWorlds.length + 1),
+                name: name,
+                setting: settingText,
+                daysLeft: days,
+                totalDays: days,
+                playersCount: 0,
+                status: "active",
+                classes: [...defaultClasses]
+            };
+
+            activeWorlds.unshift(newWorld);
+            renderWorldsList();
+            switchAdminTab('worlds');
+            alert(`🎉 Мир «${name}» успешно запущен! Теперь игроки могут регистрироваться и входить в этот сезон.`);
+        }
+
+        function closeWorld(id) {
+            if (confirm("Вы уверены, что хотите завершить этот сезон раньше времени?")) {
+                activeWorlds = activeWorlds.filter(w => w.id !== id);
+                renderWorldsList();
+            }
+        }
+
+        // --- INIT ---
+        applySettingPreset();
+        renderClassesInput();
+        renderAdminMap();
+        renderWorldsList();
     </script>
 </body>
 </html>
